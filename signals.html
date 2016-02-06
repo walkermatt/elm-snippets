@@ -6928,7 +6928,7 @@ Elm.Main.make = function (_elm) {
    var Increase = {ctor: "Increase"};
    var NoOp = {ctor: "NoOp"};
    var input = function () {
-      var toAction = function (y) {    return _U.eq(y,1) ? Increase : _U.eq(y,-1) ? Decrease : NoOp;};
+      var toAction = function (y) {    var _p3 = y;switch (_p3) {case 1: return Increase;case -1: return Decrease;default: return NoOp;}};
       var upDown = A2($Signal.map,function (_) {    return _.y;},$Keyboard.arrows);
       var action = A2($Signal.map,toAction,upDown);
       return A2($Signal.sampleOn,$Time.fps(30),action);

@@ -70,9 +70,13 @@ input =
   let
       upDown = Signal.map .y Keyboard.arrows
       toAction y =
-        if y == 1 then Increase
-        else if y == -1 then Decrease
-        else NoOp
+        case y of
+          1 ->
+            Increase
+          (-1) ->
+            Decrease
+          otherwise ->
+            NoOp
       action = Signal.map toAction upDown
   in
      Signal.sampleOn (Time.fps 30) action
