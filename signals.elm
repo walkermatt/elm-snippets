@@ -1,4 +1,5 @@
 -- Based on http://yang-wei.github.io/blog/2016/02/04/a-step-to-step-guide-to-elm-signal/
+-- Compile with `elm-make signals.elm --output signals.html`
 
 import Graphics.Element exposing (..)
 import Mouse
@@ -59,27 +60,25 @@ import Color
 -- main =
 --     Signal.map2 view Window.dimensions (Time.every Time.second)
 
--- Count down clock
+-- Countdown clock
 
-type Action = NoOp | Increase | Decrease | Reset
+type Action = Reset | Add Int
 
+-- Default intial value of our counter
 initial = 24
 
+-- Signal of arrow key generated Actions
 input : Signal Action
 input =
   let
-      upDown = Signal.map .y Keyboard.arrows
-      toAction y =
-        case y of
-          1 ->
-            Increase
-          (-1) ->
-            Decrease
-          otherwise ->
-            NoOp
-      action = Signal.map toAction upDown
+    arrowToAction = Signal.map (\arrows -> Add arrows.y) Keyboard.arrows
   in
-     Signal.sampleOn (Time.fps 30) action
+     -- Use Single.sampleOn to trigger an Action at a rate of 30 frames per
+     -- second, when the arrow keys are not down the value will be (Add 0), when
+     -- down it will repeat (Add -1) or (Add 1) depending on which arrow, this
+     -- allows the user to hold down an arrow key instead of continually
+     -- pressing the arrow key
+     Signal.sampleOn (Time.fps 30) arrowToAction
 
 space : Signal Action
 space =
@@ -87,7 +86,7 @@ space =
 
 time : Signal Action
 time =
-  Signal.map (always Decrease) (Time.every Time.second)
+  Signal.map (\time -> Add -1) (Time.every Time.second)
 
 actions : Signal Action
 actions =
@@ -102,10 +101,8 @@ clock =
 update : Action -> Int -> Int
 update action counter =
   case action of
-    Increase -> counter + 1
-    Decrease -> max 0 (counter - 1)
+    Add n -> max 0 (counter + n)
     Reset -> initial
-    NoOp -> counter
 
 view : (Int, Int) -> Int -> Element
 view (w, h) time =

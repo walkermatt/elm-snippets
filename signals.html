@@ -6915,32 +6915,26 @@ Elm.Main.make = function (_elm) {
    var initial = 24;
    var update = F2(function (action,counter) {
       var _p2 = action;
-      switch (_p2.ctor)
-      {case "Increase": return counter + 1;
-         case "Decrease": return A2($Basics.max,0,counter - 1);
-         case "Reset": return initial;
-         default: return counter;}
+      if (_p2.ctor === "Add") {
+            return A2($Basics.max,0,counter + _p2._0);
+         } else {
+            return initial;
+         }
    });
+   var Add = function (a) {    return {ctor: "Add",_0: a};};
+   var input = function () {
+      var arrowToAction = A2($Signal.map,function (arrows) {    return Add(arrows.y);},$Keyboard.arrows);
+      return A2($Signal.sampleOn,$Time.fps(30),arrowToAction);
+   }();
+   var time = A2($Signal.map,function (time) {    return Add(-1);},$Time.every($Time.second));
    var Reset = {ctor: "Reset"};
    var space = A2($Signal.map,$Basics.always(Reset),$Keyboard.space);
-   var Decrease = {ctor: "Decrease"};
-   var time = A2($Signal.map,$Basics.always(Decrease),$Time.every($Time.second));
-   var Increase = {ctor: "Increase"};
-   var NoOp = {ctor: "NoOp"};
-   var input = function () {
-      var toAction = function (y) {    var _p3 = y;switch (_p3) {case 1: return Increase;case -1: return Decrease;default: return NoOp;}};
-      var upDown = A2($Signal.map,function (_) {    return _.y;},$Keyboard.arrows);
-      var action = A2($Signal.map,toAction,upDown);
-      return A2($Signal.sampleOn,$Time.fps(30),action);
-   }();
    var actions = $Signal.mergeMany(_U.list([time,input,space]));
    var clock = A3($Signal.foldp,update,initial,actions);
    var main = A3($Signal.map2,view,$Window.dimensions,clock);
    return _elm.Main.values = {_op: _op
-                             ,NoOp: NoOp
-                             ,Increase: Increase
-                             ,Decrease: Decrease
                              ,Reset: Reset
+                             ,Add: Add
                              ,initial: initial
                              ,input: input
                              ,space: space
