@@ -1,3 +1,5 @@
+-- Compile with `elm-make countdown.elm --output countdown.html`
+
 module Main (..) where
 
 import Graphics.Element exposing (..)
